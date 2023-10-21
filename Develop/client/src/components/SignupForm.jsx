@@ -1,26 +1,41 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
 
-import { createUser } from '../utils/API';
+// Import Apollo Client's useMutation hook and the ADD_USER mutation
+import { useMutation } from '@apollo/client';
+import { ADD_USER } from '../utils/mutations';
+
+// Import the Auth utility for user authentication
 import Auth from '../utils/auth';
 
 const SignupForm = () => {
-  // set initial form state
-  const [userFormData, setUserFormData] = useState({ username: '', email: '', password: '' });
-  // set state for form validation
+  // Initialize form state
+  const [userFormData, setUserFormData] = useState({
+    username: '',
+    email: '',
+    password: ''
+  });
+
+  // Use the useMutation hook to call the ADD_USER mutation
+  const [addUser, { error }] = useMutation(ADD_USER);
+
+  // State for form validation
   const [validated] = useState(false);
-  // set state for alert
+
+  // State for displaying alert messages
   const [showAlert, setShowAlert] = useState(false);
 
+  // Handle changes in the input fields
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setUserFormData({ ...userFormData, [name]: value });
   };
 
+  // Handle form submission
   const handleFormSubmit = async (event) => {
     event.preventDefault();
 
-    // check if form has everything (as per react-bootstrap docs)
+    // Check if the form is valid according to react-bootstrap's rules
     const form = event.currentTarget;
     if (form.checkValidity() === false) {
       event.preventDefault();
@@ -28,20 +43,23 @@ const SignupForm = () => {
     }
 
     try {
-      const response = await createUser(userFormData);
+      // Use the addUser mutation to register the user
+      const { data } = await addUser({
+        variables: { ...userFormData },
+      });
 
-      if (!response.ok) {
-        throw new Error('something went wrong!');
-      }
+      console.log(data);
 
-      const { token, user } = await response.json();
-      console.log(user);
-      Auth.login(token);
+      // Log the user in with the token received from the server
+      Auth.login(data.addUser.token);
     } catch (err) {
       console.error(err);
+
+      // Show an alert if there's an error during signup
       setShowAlert(true);
     }
 
+    // Clear the form data after submission
     setUserFormData({
       username: '',
       email: '',
@@ -51,13 +69,14 @@ const SignupForm = () => {
 
   return (
     <>
-      {/* This is needed for the validation functionality above */}
+      {/* The Form component with validation */}
       <Form noValidate validated={validated} onSubmit={handleFormSubmit}>
-        {/* show alert if server response is bad */}
+        {/* Display an alert if there's an error */}
         <Alert dismissible onClose={() => setShowAlert(false)} show={showAlert} variant='danger'>
           Something went wrong with your signup!
         </Alert>
 
+        {/* Username input field */}
         <Form.Group className='mb-3'>
           <Form.Label htmlFor='username'>Username</Form.Label>
           <Form.Control
@@ -71,6 +90,7 @@ const SignupForm = () => {
           <Form.Control.Feedback type='invalid'>Username is required!</Form.Control.Feedback>
         </Form.Group>
 
+        {/* Email input field */}
         <Form.Group className='mb-3'>
           <Form.Label htmlFor='email'>Email</Form.Label>
           <Form.Control
@@ -84,6 +104,7 @@ const SignupForm = () => {
           <Form.Control.Feedback type='invalid'>Email is required!</Form.Control.Feedback>
         </Form.Group>
 
+        {/* Password input field */}
         <Form.Group className='mb-3'>
           <Form.Label htmlFor='password'>Password</Form.Label>
           <Form.Control
@@ -96,6 +117,8 @@ const SignupForm = () => {
           />
           <Form.Control.Feedback type='invalid'>Password is required!</Form.Control.Feedback>
         </Form.Group>
+
+        {/* Submit button */}
         <Button
           disabled={!(userFormData.username && userFormData.email && userFormData.password)}
           type='submit'
