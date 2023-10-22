@@ -26,20 +26,19 @@ async function startServer() {
   // Apply the Apollo GraphQL middleware and set the path to /graphql
   server.applyMiddleware({ app, path: '/graphql' });
 
-  app.use(express.urlencoded({ extended: true }));
-  app.use(express.json());
-
-  app.get('/', (req, res) => {
-    res.send('Welcome to Book Store Search Server!');
-});
-
   // Serve static assets if in production
   if (process.env.NODE_ENV === 'production') {
     app.use(express.static(path.join(__dirname, '../client/dist')));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(__dirname, '../client/dist/index.html'));
-    });
   }
+
+  app.get('/', (req, res) => {
+    res.send('Welcome to Book Store Search Server!');
+  });
+
+  // This catch-all route should be the last route
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+  });
 
   db.once('open', () => {
     app.listen(PORT, () => {
