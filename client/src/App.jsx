@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { ApolloProvider } from '@apollo/react-hooks';
 import ApolloClient from 'apollo-boost'
 import SearchBooks from './pages/SearchBooks';
@@ -28,19 +28,17 @@ function App() {
     <ApolloProvider client={client}>
       {/* Use Router component for client-side routing */}
       <Router>
-        <>
-          {/* Display the Navbar component on all pages */}
-          <Navbar />
-          {/* Switch component to render the first matching Route */}
-          <Switch>
+        {/* Display the Navbar component on all pages */}
+        <Navbar />
+        {/* Routes component to define the application's routes */}
+        <Routes>
             {/* Route for the SearchBooks page (exact path: '/') */}
-            <Route exact path='/' component={SearchBooks} />
+            <Route path='/' element={<SearchBooks />} />
             {/* Route for the SavedBooks page (exact path: '/saved') */}
-            <Route exact path='/saved' component={SavedBooks} />
+            <Route path='/saved' element={<SavedBooks />} />
             {/* Default route for handling incorrect page URLs */}
-            <Route render={() => <h1 className='display-2'>Page Not Found!</h1>} />
-          </Switch>
-        </>
+            <Route path='*' element={<h1 className='display-2'>Page Not Found!</h1>} />
+        </Routes>
       </Router>
     </ApolloProvider>
   );
