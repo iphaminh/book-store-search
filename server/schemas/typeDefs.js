@@ -12,8 +12,8 @@ type Mutation {
     removeBook(bookId: String!): User
 }
 
-input BookInput{
-    bookId: String!
+input BookInput {
+    bookId: String
     authors: [String]
     description: String
     title: String
@@ -22,13 +22,14 @@ input BookInput{
 }
 type User {
     _id: ID!
-    username: String!
-    email: String!
+    username: String
+    email: String
     bookCount: Int
     savedBooks: [Book]
 }
 
 type Book {
+    _id: ID
     bookId: String!
     authors: [String]
     description: String
